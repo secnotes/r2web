@@ -1,0 +1,90 @@
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #181825;
+  --bg-tertiary: #11111b;
+  --text-primary: #cdd6f4;
+  --text-secondary: #a6adc8;
+  --text-muted: #6c7086;
+  --accent: #89b4fa;
+  --accent-hover: #b4befe;
+  --success: #a6e3a1;
+  --warning: #f9e2af;
+  --error: #f38ba8;
+  --border: #313244;
+  --highlight: #f5c2e7;
+  --string: #a6e3a1;
+  --comment: #6c7086;
+  --keyword: #cba6f7;
+  --function: #89dceb;
+  --number: #fab387;
+  --address: #f5c2e7;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e8e8e8;
+  --text-primary: #1e1e1e;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --accent: #0066cc;
+  --accent-hover: #0052a3;
+  --success: #28a745;
+  --warning: #ffc107;
+  --error: #dc3545;
+  --border: #d0d0d0;
+  --highlight: #d040fb;
+  --string: #28a745;
+  --comment: #6a9955;
+  --keyword: #af00db;
+  --function: #007acc;
+  --number: #b5200d;
+  --address: #800000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: var(--bg-primary);
+}

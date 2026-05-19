@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug/test files
+test-*.js
+test-*.html
+test-*.png
+test-*.ts
+debug-*.png
+0x*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Large WASM files (distribute via releases instead)
+# Keep radare2.wasm and rasm2.wasm for core functionality
+src/wasm/rabin2.wasm
+src/wasm/radiff2.wasm
+src/wasm/rafind2.wasm
+src/wasm/rafs2.wasm
+src/wasm/rahash2.wasm
+src/wasm/rax2.wasm
+
+# Temporary files
+*.tmp
+*.temp

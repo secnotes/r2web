@@ -1,0 +1,37 @@
+{
+  "name": "r2web",
+  "version": "1.0.0",
+  "description": "Browser-based reverse engineering platform powered by radare2 WebAssembly",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "build:wasm": "cd ../radare2 && ./sys/emscripten.sh"
+  },
+  "keywords": [
+    "reverse-engineering",
+    "radare2",
+    "webassembly",
+    "disassembler",
+    "ida"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "playwright": "^1.60.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "vite-plugin-wasm": "^3.6.0"
+  },
+  "dependencies": {
+    "@wasmer/wasi": "^1.2.2",
+    "@wasmer/wasmfs": "^0.12.0",
+    "buffer": "^6.0.3"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>R2Web - Browser-based Reverse Engineering</title>
+    <script>
+      // Apply theme BEFORE any CSS loads to prevent flash of wrong theme
+      (function() {
+        var savedTheme = localStorage.getItem('r2web-theme');
+        var theme;
+        if (savedTheme) {
+          theme = savedTheme;
+        } else {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+    </style>
+    <script type="module" crossorigin src="./assets/index-1qCfYTp_.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BIyTOL28.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
