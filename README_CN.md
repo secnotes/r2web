@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![WebAssembly](https://img.shields.io/badge/Platform-WebAssembly-654ff0.svg)](https://webassembly.org/)
-[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/secnotes/r2web)
+[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/secnotes/r2web/releases/tag/v0.0.1)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
 [![radare2](https://img.shields.io/badge/radare2-6.1.5-orange.svg)](https://radare.org/)
@@ -121,7 +121,7 @@ r2web/
 
 ## 许可证
 
-MIT License
+[MIT License](LICENSE)
 
 ## 贡献
 
