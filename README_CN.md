@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![WebAssembly](https://img.shields.io/badge/Platform-WebAssembly-654ff0.svg)](https://webassembly.org/)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/yourusername/r2web)
+[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/secnotes/r2web)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
 [![radare2](https://img.shields.io/badge/radare2-6.1.5-orange.svg)](https://radare.org/)
@@ -28,6 +28,10 @@
 - 💻 **命令行** - 交互式 radare2 命令界面
 - 🎨 **主题支持** - 亮色/暗色主题，自动检测系统偏好
 - 🌐 **多语言** - 英文/中文界面切换
+
+## 截图
+
+![R2Web 截图](pictures/demo.png)
 
 ## 快速开始
 
@@ -108,10 +112,6 @@ r2web/
 - 支持 WebAssembly 的现代浏览器
 - 需启用 SharedArrayBuffer（要求 COOP/COEP 响应头）
 - 推荐：Chrome 88+、Firefox 89+、Safari 15+
-
-## 截图
-
-*即将添加*
 
 ## 相关项目
 

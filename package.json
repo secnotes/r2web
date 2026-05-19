@@ -1,6 +1,6 @@
 {
   "name": "r2web",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Browser-based reverse engineering platform powered by radare2 WebAssembly",
   "main": "index.js",
   "scripts": {

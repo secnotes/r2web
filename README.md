@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![WebAssembly](https://img.shields.io/badge/Platform-WebAssembly-654ff0.svg)](https://webassembly.org/)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/yourusername/r2web)
+[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/secnotes/r2web)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
 [![radare2](https://img.shields.io/badge/radare2-6.1.5-orange.svg)](https://radare.org/)
@@ -28,6 +28,10 @@
 - 💻 **Console** - Interactive radare2 command interface
 - 🎨 **Theme Support** - Light/Dark theme with system detection
 - 🌐 **Multi-language** - English/Chinese interface
+
+## Screenshots
+
+![R2Web Screenshot](pictures/demo.png)
 
 ## Quick Start
 
@@ -108,10 +112,6 @@ If you want to compile the WASM modules yourself:
 - Modern browser with WebAssembly support
 - SharedArrayBuffer enabled (requires COOP/COEP headers)
 - Recommended: Chrome 88+, Firefox 89+, Safari 15+
-
-## Screenshots
-
-*Coming soon*
 
 ## Related Projects
 
