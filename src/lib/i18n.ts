@@ -5,6 +5,7 @@ const translations: Record<Lang, Record<string, string>> = {
   en: {
     // Views
     'view_disassembly': 'Disassembly',
+    'view_decompiler': 'Decompiler',
     'view_graph': 'Graph',
     'view_hex': 'Hex',
     'view_strings': 'Strings',
@@ -58,6 +59,7 @@ const translations: Record<Lang, Record<string, string>> = {
   zh: {
     // Views
     'view_disassembly': '反汇编',
+    'view_decompiler': '反编译',
     'view_graph': '图形',
     'view_hex': '十六进制',
     'view_strings': '字符串',

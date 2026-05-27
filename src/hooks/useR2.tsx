@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, createContext, useContext, useRef } from 'react'
-import type { FileInfo, Function, Instruction, StringInfo, HexLine, ConsoleEntry, R2CommandResult, Section } from '../types'
+import type { FileInfo, Function, Instruction, StringInfo, HexLine, ConsoleEntry, R2CommandResult, Section, DecompilerResult } from '../types'
 import { R2WasiRuntime } from '../lib/R2WasiRuntime'
 import { useWASMLoader } from '../lib/WASMLoader'
 
@@ -22,6 +22,7 @@ interface R2AnalyzerInterface {
   getCurrentOffset: () => number
   destroy: () => void
   getFunctionCFG: (offset: number) => Promise<{ nodes: any[], edges: any[] }>
+  getDecompiledCode: (offset: number) => Promise<DecompilerResult>
 }
 
 interface R2ContextType {
@@ -38,11 +39,13 @@ interface R2ContextType {
   strings: StringInfo[]
   allInstructions: Instruction[]
   consoleHistory: ConsoleEntry[]
+  decompiledCode: DecompilerResult | null
   loadFile: (file: File) => Promise<void>
   executeCommand: (cmd: string) => Promise<R2CommandResult>
   seekTo: (offset: number) => Promise<void>
   refreshAnalysis: () => Promise<void>
   addConsoleEntry: (entry: ConsoleEntry) => void
+  decompileFunction: (offset: number) => Promise<void>
 }
 
 const R2Context = createContext<R2ContextType | null>(null)
@@ -68,6 +71,9 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
   const [strings, setStrings] = useState<StringInfo[]>([])
   const [allInstructions, setAllInstructions] = useState<Instruction[]>([])
   const [consoleHistory, setConsoleHistory] = useState<ConsoleEntry[]>([])
+  const [decompiledCode, setDecompiledCode] = useState<DecompilerResult | null>(null)
+  const decompileCache = useRef<Map<number, DecompilerResult>>(new Map())
+  const lastDecompiledOffset = useRef<number>(0)
   const consoleIdRef = useRef(0)
 
   // Define addConsoleEntry BEFORE useEffect that uses it
@@ -227,6 +233,35 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
     setFunctions(funcs)
   }, [r2])
 
+  const decompileFunction = useCallback(async (offset: number) => {
+    if (!r2) return
+
+    // Check cache first
+    const cached = decompileCache.current.get(offset)
+    if (cached) {
+      // Only update state if offset changed
+      if (lastDecompiledOffset.current !== offset) {
+        setDecompiledCode(cached)
+        lastDecompiledOffset.current = offset
+      }
+      // Always clear loading state
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const result = await r2.getDecompiledCode(offset)
+      setDecompiledCode(result)
+      decompileCache.current.set(offset, result)
+      lastDecompiledOffset.current = offset
+    } catch (e) {
+      setDecompiledCode({ code: `// Error: ${e}`, annotations: [] })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [r2])
+
   return (
     <R2Context.Provider value={{
       r2,
@@ -242,11 +277,13 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       strings,
       allInstructions,
       consoleHistory,
+      decompiledCode,
       loadFile,
       executeCommand,
       seekTo,
       refreshAnalysis,
       addConsoleEntry,
+      decompileFunction,
     }}>
       {children}
     </R2Context.Provider>

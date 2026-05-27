@@ -41,7 +41,6 @@ export function GraphView() {
   useEffect(() => {
     const fetchCFG = async () => {
       if (!r2 || currentOffset === undefined || !functions || functions.length === 0) {
-        console.log('[Graph] Skipping CFG fetch: r2=', !!r2, 'currentOffset=', currentOffset, 'functions=', functions?.length)
         return
       }
 
@@ -55,15 +54,11 @@ export function GraphView() {
                           functions.find(f => !f.name.startsWith('sym.imp.'))
 
       if (!currentFunc) {
-        console.log('[Graph] No function found for offset:', currentOffset)
         return
       }
 
-      console.log('[Graph] Fetching CFG for function:', currentFunc.name, 'offset:', currentFunc.offset)
-
       // Use radare2's built-in CFG analysis
       const cfg = await r2.getFunctionCFG(currentFunc.offset)
-      console.log('[Graph] Radare2 CFG:', cfg)
 
       if (cfg.nodes.length === 0) {
         // Fallback to manual CFG construction
@@ -76,14 +71,11 @@ export function GraphView() {
       for (const r2Node of cfg.nodes) {
         // Address is already a number from r2Node.address
         const addr = r2Node.address || 0
-        console.log('[Graph] Node address:', addr, 'type:', typeof addr)
 
         // Find instructions in this block
         const blockInsts = allInstructions?.filter(inst =>
           inst.offset >= addr && inst.offset < addr + (r2Node.size || 16)
         ) || []
-
-        console.log('[Graph] Block instructions:', blockInsts.length, 'for addr:', addr)
 
         // Determine block type
         const lastInst = blockInsts[blockInsts.length - 1]
@@ -112,23 +104,17 @@ export function GraphView() {
 
   // Manual CFG construction fallback
   const buildManualCFG = (instructions: any[] | null | undefined, currentFunc: any): CFGData => {
-    console.log('[Graph] Building manual CFG, currentFunc:', currentFunc?.name, 'offset:', currentFunc?.offset)
-
     if (!instructions || instructions.length === 0) {
-      console.log('[Graph] No instructions available')
       return { nodes: [], edges: [], totalHeight: 400, totalWidth: 600, originalCount: 0 }
     }
 
     if (!currentFunc || isNaN(currentFunc.offset)) {
-      console.log('[Graph] Invalid function data')
       return { nodes: [], edges: [], totalHeight: 400, totalWidth: 600, originalCount: 0 }
     }
 
     const funcInstructions = instructions.filter(inst =>
       inst.offset >= currentFunc.offset && inst.offset < currentFunc.offset + (currentFunc.size || 1000)
     )
-
-    console.log('[Graph] Function instructions:', funcInstructions.length)
 
     if (funcInstructions.length === 0) return { nodes: [], edges: [], totalHeight: 400, totalWidth: 600, originalCount: 0 }
 

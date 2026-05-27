@@ -62,3 +62,16 @@ export interface ConsoleEntry {
   content: string
   timestamp: number
 }
+
+// Decompiler types for pdcj output
+export interface DecompilerAnnotation {
+  start: number    // Start position in code string
+  end: number      // End position in code string
+  offset: number   // Address in binary
+  type: string     // Annotation type (e.g., 'offset')
+}
+
+export interface DecompilerResult {
+  code: string                      // Decompiled pseudo-C code
+  annotations: DecompilerAnnotation[]  // Position-to-address mappings
+}

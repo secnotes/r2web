@@ -14,11 +14,12 @@ import { ConsoleView } from './components/ConsoleView'
 import { StatusBar } from './components/StatusBar'
 import { FileDrop } from './components/FileDrop'
 import { SearchBox } from './components/SearchBox'
+import { DecompilerView } from './components/DecompilerView'
 import { R2Provider, useR2 } from './hooks/useR2'
 import { initLang } from './lib/i18n'
 import './styles/App.css'
 
-export type ViewType = 'disassembly' | 'hex' | 'strings' | 'imports' | 'sections' | 'symbols' | 'graph'
+export type ViewType = 'disassembly' | 'hex' | 'strings' | 'imports' | 'sections' | 'symbols' | 'graph' | 'decompiler'
 
 function AppContent() {
   const [activeView, setActiveView] = useState<ViewType>('disassembly')
@@ -108,6 +109,7 @@ function AppContent() {
               {activeView === 'sections' && <SectionsView />}
               {activeView === 'symbols' && <SymbolsView />}
               {activeView === 'graph' && <GraphView />}
+              {activeView === 'decompiler' && <DecompilerView />}
             </div>
           </div>
           <div className="resize-handle-horizontal" onMouseDown={startConsoleResize} />

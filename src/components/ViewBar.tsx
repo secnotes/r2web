@@ -9,6 +9,7 @@ interface ViewBarProps {
 
 const views: { id: ViewType; labelKey: string }[] = [
   { id: 'disassembly', labelKey: 'view_disassembly' },
+  { id: 'decompiler', labelKey: 'view_decompiler' },
   { id: 'graph', labelKey: 'view_graph' },
   { id: 'hex', labelKey: 'view_hex' },
   { id: 'strings', labelKey: 'view_strings' },

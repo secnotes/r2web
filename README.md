@@ -20,6 +20,7 @@
 
 - 📁 **File Analysis** - Support for ELF, PE, Mach-O and other binary formats
 - 🔍 **Disassembly View** - Assembly code with syntax highlighting
+- 🔄 **Decompiler View** - Pseudo-C decompilation using radare2's pdc
 - 📊 **Control Flow Graph** - Visual CFG with proper edge routing
 - 🔢 **Hex View** - Raw hex dump with ASCII representation
 - 📝 **Strings View** - Extracted strings from binary

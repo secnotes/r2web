@@ -1,7 +1,7 @@
 // Radare2 WASI Runtime - Complete binary analysis using radare2 WASM
 // Using WASIInit module to ensure WASI is properly initialized
 
-import type { FileInfo, Function, Instruction, StringInfo, HexLine, R2CommandResult, Section } from '../types'
+import type { FileInfo, Function, Instruction, StringInfo, HexLine, R2CommandResult, Section, DecompilerResult } from '../types'
 import { getWASI, isWASIReady } from './WASIInit'
 
 // Radare2 JSON output types - matching actual r2 output
@@ -109,8 +109,6 @@ export class R2WasiRuntime {
     if (this.initialized) return
 
     try {
-      console.log('[R2Wasi] Initializing...')
-
       // Check if WASI is ready (initialized by WASMLoader)
       if (!isWASIReady()) {
         throw new Error('WASI not initialized - WASMLoader should initialize WASI first')
@@ -124,14 +122,11 @@ export class R2WasiRuntime {
         throw new Error('WASI class not found in module')
       }
 
-      console.log('[R2Wasi] WASI class acquired')
-
       // Use provided module or load from URL
       if (providedModule) {
         this.r2Module = providedModule
       } else {
         const r2Url = new URL('../wasm/radare2.wasm', import.meta.url).href
-        console.log('[R2Wasi] Loading radare2 from:', r2Url)
         const r2Response = await fetch(r2Url)
         if (!r2Response.ok) {
           throw new Error(`Failed to fetch radare2.wasm: ${r2Response.status}`)
@@ -140,7 +135,6 @@ export class R2WasiRuntime {
         this.r2Module = await WebAssembly.compile(r2Bytes)
       }
 
-      console.log('[R2Wasi] Initialized successfully')
       this.initialized = true
     } catch (error) {
       console.error('[R2Wasi] Init failed:', error)
@@ -167,33 +161,26 @@ export class R2WasiRuntime {
         '-e', 'scr.color=false',
         '-e', 'scr.utf8=false',
         '-e', 'asm.bytes=true',
-        '-e', 'bin.relocs.apply=false', // Suppress reloc warnings
+        '-e', 'bin.relocs.apply=false',
         '-c', cmdString,
         '/tmp/binary'
       ]
 
-      console.log('[R2Wasi] Running:', args.join(' '))
-
-      // Create WASI instance
+      // Create WASI instance with larger buffer for stdout
       const wasi = new this.WASIClass({
         args,
-        env: { HOME: '/home', TERM: 'xterm' }
+        env: { HOME: '/home', TERM: 'xterm' },
+        stdoutBuffer: new Uint8Array(1024 * 1024 * 10)
       })
 
-      // Create directory and write file using WASI's fs
+      // Create directory and write file
       const fs = wasi.fs
       fs.createDir('/tmp')
       const file = fs.open('/tmp/binary', { create: true, write: true, read: true })
       file.write(this.fileData)
-      console.log('[R2Wasi] File written to /tmp/binary')
 
-      // Build imports object with WASI and custom r2 imports
-      // Use async instantiation for large WASM modules (radare2 is 42MB)
-      console.log('[R2Wasi] Building imports...')
-
+      // Build imports
       const imports: Record<string, Record<string, any>> = {}
-
-      // Get WASI imports
       const wasiImports = wasi.getImports(this.r2Module)
       for (const [moduleName, moduleImports] of Object.entries(wasiImports)) {
         imports[moduleName] = moduleImports as Record<string, any>
@@ -208,23 +195,15 @@ export class R2WasiRuntime {
         http_post: (_url: number, _data: number, _len: number, _buf: number, _buflen: number, _method: number) => 0,
       }
 
-      console.log('[R2Wasi] Async instantiation (for large WASM)...')
-
-      // Use WebAssembly.instantiate for async compilation (required for >8MB WASM)
+      // Instantiate WASM
       const wasmResult = await WebAssembly.instantiate(this.r2Module, imports) as WebAssembly.Instance | { instance: WebAssembly.Instance }
       const instance = (wasmResult as any).instance || wasmResult
-      console.log('[R2Wasi] Instance created')
 
-      // Run WASI program with the instance
-      console.log('[R2Wasi] Starting execution...')
-      const exitCode = wasi.start(instance)
-      console.log('[R2Wasi] Execution complete, exit code:', exitCode)
+      // Run WASI program
+      wasi.start(instance)
 
-      // Get stdout and filter out INFO/WARN messages for JSON parsing
+      // Get stdout
       const stdout = wasi.getStdoutString() || ''
-      console.log('[R2Wasi] Output length:', stdout.length)
-
-      // Remove INFO/WARN lines from output for clean JSON parsing
       const cleanOutput = stdout
         .split('\n')
         .filter((line: string) => !line.startsWith('INFO:') && !line.startsWith('WARN:') && !line.startsWith('ERROR:'))
@@ -240,12 +219,11 @@ export class R2WasiRuntime {
   async loadFile(data: Uint8Array, name: string): Promise<boolean> {
     this.fileData = data
     this.fileName = name
-    console.log(`[R2Wasi] Loaded ${name} (${data.length} bytes)`)
     return true
   }
 
   async analyze(): Promise<void> {
-    console.log('[R2Wasi] Analysis will run with first query')
+    // Analysis will run with first query
   }
 
   async getFileInfo(): Promise<FileInfo> {
@@ -478,34 +456,23 @@ export class R2WasiRuntime {
   // Get CFG for current function using radare2's built-in analysis
   async getFunctionCFG(offset: number): Promise<{ nodes: any[], edges: any[] }> {
     try {
-      console.log('[R2Wasi] Getting CFG for offset:', offset)
-
       // Use agfj to get CFG in JSON format
       const output = await this.runCommands(['aaa', `s 0x${offset.toString(16)}`, 'agfj'])
 
-      console.log('[R2Wasi] agfj output length:', output.length)
-
       if (!output || output.trim() === '') {
-        console.log('[R2Wasi] No agfj output, returning empty')
         return { nodes: [], edges: [] }
       }
 
       // Parse the JSON output
       const cfgData = JSON.parse(output)
 
-      console.log('[R2Wasi] CFG parsed, type:', typeof cfgData, 'isArray:', Array.isArray(cfgData))
-
       // agfj returns an array of function objects, each containing a "blocks" array
-      // Format: [{"name":"main","addr":15136,"blocks":[{"addr":15136,"jump":16161,"fail":15263},...]}]
       let blocks: any[] = []
 
       if (Array.isArray(cfgData) && cfgData.length > 0) {
-        // Get blocks from the first function object
         const funcObj = cfgData[0]
         blocks = funcObj.blocks || []
-        console.log('[R2Wasi] Function:', funcObj.name, 'blocks:', blocks.length)
       } else if (cfgData.nodes) {
-        // Alternative graph format with nodes/edges
         return {
           nodes: cfgData.nodes.map((n: any) => ({
             id: `n${n.offset || n.address}`,
@@ -522,7 +489,6 @@ export class R2WasiRuntime {
 
       for (const block of blocks) {
         const blockAddr = block.addr || block.address || 0
-        console.log('[R2Wasi] Block at 0x' + blockAddr.toString(16), 'jump:', block.jump, 'fail:', block.fail)
 
         nodes.push({
           id: `n${blockAddr}`,
@@ -530,7 +496,6 @@ export class R2WasiRuntime {
           size: block.size || 16
         })
 
-        // Add edges
         if (block.jump !== undefined && block.jump !== null) {
           edges.push({
             from: `n${blockAddr}`,
@@ -547,11 +512,57 @@ export class R2WasiRuntime {
         }
       }
 
-      console.log('[R2Wasi] CFG result: nodes:', nodes.length, 'edges:', edges.length)
       return { nodes, edges }
     } catch (e) {
-      console.error('[R2Wasi] Failed to get CFG:', e)
       return { nodes: [], edges: [] }
+    }
+  }
+
+  // Get decompiled pseudo-C code for current function using radare2's pdcj command
+  async getDecompiledCode(offset: number): Promise<DecompilerResult> {
+    try {
+      // First analyze the function, then decompile
+      const output = await this.runCommands([
+        `af @ 0x${offset.toString(16)}`,
+        `s 0x${offset.toString(16)}`,
+        'pdcj'
+      ])
+
+      if (!output || output.trim() === '') {
+        // Fallback to pdc (plain text pseudo-C)
+        const pdcOutput = await this.runCommands([
+          `af @ 0x${offset.toString(16)}`,
+          `s 0x${offset.toString(16)}`,
+          'pdc'
+        ])
+        if (pdcOutput && pdcOutput.trim()) {
+          return { code: pdcOutput, annotations: [] }
+        }
+        return { code: '// No decompilation available', annotations: [] }
+      }
+
+      // Parse JSON output
+      const decompiledData = JSON.parse(output)
+
+      return {
+        code: decompiledData.code || '// No code generated',
+        annotations: decompiledData.annotations || []
+      }
+    } catch (e) {
+      // Try plain pdc as fallback
+      try {
+        const pdcOutput = await this.runCommands([
+          `af @ 0x${offset.toString(16)}`,
+          `s 0x${offset.toString(16)}`,
+          'pdc'
+        ])
+        if (pdcOutput && pdcOutput.trim()) {
+          return { code: pdcOutput, annotations: [] }
+        }
+      } catch {
+        // ignore
+      }
+      return { code: `// Error: ${e}`, annotations: [] }
     }
   }
 

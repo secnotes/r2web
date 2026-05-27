@@ -57,6 +57,8 @@ export function WASMLoaderProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const loadModules = async () => {
+      let loadedCount = 0 // Track locally to avoid stale state
+
       try {
         console.log('[WASM] Starting module loading...')
 
@@ -107,13 +109,13 @@ export function WASMLoaderProvider({ children }: { children: React.ReactNode }) 
             chunks.push(value)
             loadedBytes += value.length
 
-            // Update progress within module
-            const modulePercent = (loadedBytes / totalSize) * 100
-            const overallPercent = ((progress.loadedModules + modulePercent / 100) / WASM_MODULES.length) * 100
+            // Update progress within module - use local loadedCount
+            const modulePercent = Math.min(100, (loadedBytes / totalSize) * 100)
+            const overallPercent = ((loadedCount + modulePercent / 100) / WASM_MODULES.length) * 100
 
             setProgress(prev => ({
               ...prev,
-              percent: Math.round(overallPercent)
+              percent: Math.min(100, Math.round(overallPercent))
             }))
           }
 
@@ -132,10 +134,12 @@ export function WASMLoaderProvider({ children }: { children: React.ReactNode }) 
           const compiledModule = await WebAssembly.compile(combined)
           modules.set(module.name, compiledModule)
 
+          loadedCount++ // Increment local counter
+
           setProgress(prev => ({
             ...prev,
-            loadedModules: prev.loadedModules + 1,
-            percent: Math.round(((prev.loadedModules + 1) / WASM_MODULES.length) * 100)
+            loadedModules: loadedCount,
+            percent: Math.min(100, Math.round((loadedCount / WASM_MODULES.length) * 100))
           }))
 
           console.log(`[WASM] Compiled ${module.name}`)
